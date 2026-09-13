@@ -18,47 +18,100 @@ _start:
 3:  wfi
     j       3b
 
-.section .text
-.align 4
+    .section .text
+    .align 4
 .global trap_entry
 trap_entry:
-    addi sp ,sp,-64
 
-    sw ra,  0(sp)
-    sw t0,  4(sp)
-    sw t1,  8(sp)
-    sw t2,  12(sp)
-    sw a0,  16(sp)
-    sw a1,  20(sp)
-    sw a2,  24(sp)
-    sw a3,  28(sp)
-    sw a4,  32(sp)
-    sw a5,  36(sp)
-    sw a6,  40(sp)
-    sw a7,  44(sp)
-    sw t3,  48(sp)
-    sw t4,  52(sp)
-    sw t5,  56(sp)
-    sw t6,  60(sp)
+addi    sp, sp, -128            # allocate frame first: offsets stay positive
+ 
+    sw      x1,    0(sp)            # x0 hardwired, x2 (sp) lives in the TCB
+    sw      x3,    4(sp)
+    sw      x4,    8(sp)
+    sw      x5,   12(sp)
+    sw      x6,   16(sp)
+    sw      x7,   20(sp)
+    sw      x8,   24(sp)
+    sw      x9,   28(sp)
+    sw      x10,  32(sp)
+    sw      x11,  36(sp)
+    sw      x12,  40(sp)
+    sw      x13,  44(sp)
+    sw      x14,  48(sp)
+    sw      x15,  52(sp)
+    sw      x16,  56(sp)
+    sw      x17,  60(sp)
+    sw      x18,  64(sp)
+    sw      x19,  68(sp)
+    sw      x20,  72(sp)
+    sw      x21,  76(sp)
+    sw      x22,  80(sp)
+    sw      x23,  84(sp)
+    sw      x24,  88(sp)
+    sw      x25,  92(sp)
+    sw      x26,  96(sp)
+    sw      x27, 100(sp)
+    sw      x28, 104(sp)
+    sw      x29, 108(sp)
+    sw      x30, 112(sp)
+    sw      x31, 116(sp)
 
-call trap_handler
+    csrr    t0, mepc                
+    sw      t0,  120(sp)
+    csrr    t0, mstatus
+    sw      t0,  124(sp)
+ 
 
-    lw ra,  0(sp)
-    lw t0,  4(sp)
-    lw t1,  8(sp)
-    lw t2,  12(sp)
-    lw a0,  16(sp)
-    lw a1,  20(sp)
-    lw a2,  24(sp)
-    lw a3,  28(sp)
-    lw a4,  32(sp)
-    lw a5,  36(sp)
-    lw a6,  40(sp)
-    lw a7,  44(sp)
-    lw t3,  48(sp)
-    lw t4,  52(sp)
-    lw t5,  56(sp)
-    lw t6,  60(sp)
+    csrr t0, mcause
+    bltz t0, interrupt_handler
 
-    addi sp ,sp,64
+    call trap_handler
+    j   restore 
+
+interrupt_handler:
+    mv a0, sp
+    call context_switch
+    mv sp, a0
+    j   restore
+
+restore:
+
+// restoring values from stack
+    lw      t0,  124(sp)
+    csrw    mstatus, t0             
+    lw      t0,  120(sp)
+    csrw    mepc, t0
+ 
+    lw      x1,    0(sp)
+    lw      x3,    4(sp)
+    lw      x4,    8(sp)
+    lw      x5,   12(sp)
+    lw      x6,   16(sp)
+    lw      x7,   20(sp)
+    lw      x8,   24(sp)
+    lw      x9,   28(sp)
+    lw      x10,  32(sp)
+    lw      x11,  36(sp)
+    lw      x12,  40(sp)
+    lw      x13,  44(sp)
+    lw      x14,  48(sp)
+    lw      x15,  52(sp)
+    lw      x16,  56(sp)
+    lw      x17,  60(sp)
+    lw      x18,  64(sp)
+    lw      x19,  68(sp)
+    lw      x20,  72(sp)
+    lw      x21,  76(sp)
+    lw      x22,  80(sp)
+    lw      x23,  84(sp)
+    lw      x24,  88(sp)
+    lw      x25,  92(sp)
+    lw      x26,  96(sp)
+    lw      x27, 100(sp)
+    lw      x28, 104(sp)
+    lw      x29, 108(sp)
+    lw      x30, 112(sp)
+    lw      x31, 116(sp)
+ 
+    addi    sp, sp, 128
     mret

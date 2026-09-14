@@ -1,43 +1,68 @@
 #include "kernel.h"
+#include "timer.h"
 
-#define NTASKS 2
-#define STACK_SIZE 256
+TCB tcb[TOTTASKS];
 
-
-
-TCB tcb[NTASKS];
-
-uint32_t stacks[NTASKS][STACK_SIZE];
+uint32_t stacks[TOTTASKS][STACK_SIZE];
 
 uint32_t current_task = 0;
 
-void task_create(int task, void (*fn)(void))
+void task_create(int task, void (*fn)(void), uint32_t priority)
 {
-    uint32_t *sp = &stacks[task][STACK_SIZE];   
-    sp -= 32;                                
+    uint32_t *sp = &stacks[task][STACK_SIZE];
+    sp -= 32;
 
     for (int w = 0; w < 32; w++)
         sp[w] = 0;
 
-    sp[30] = (uint32_t)fn;                
-    sp[31] = ((3<<11) | (1<<7));          
+    sp[30] = (uint32_t)fn;
+    sp[31] = ((3 << 11) | (1 << 7));
 
-    tcb[task].sp = (uint32_t)sp;
+    tcb[task].sp = (uint32_t *)sp;
+    tcb[task].priority = priority;
+    tcb[task].state = TASK_READY;
 }
 
-
-uint32_t context_switch(uint32_t *sp)
+uint32_t *context_switch(uint32_t *sp)
 {
-    static int first_time = 0;
-    if (first_time) {
-        tcb[current_task].sp = sp;
-    }
-    first_time = 1;
+    int higest_priority_task = -1;
+    tcb[current_task].sp = sp;
     timer_next();
-    current_task= ((current_task + 1) % NTASKS);
+    int i=current_task+1;
+    while(i!=current_task){
+        if(tcb[i].state == TASK_READY){
+            if(higest_priority_task == -1 || tcb[i].priority>= tcb[higest_priority_task].priority ){
+                higest_priority_task =i;
+            }
+        }
+        i=((i+1)%TOTTASKS);
+    }
+
+    current_task = higest_priority_task;
+
     return tcb[current_task].sp;
 }
 
+void idle_task(void)
+{
+    for (;;)
+        __asm__ volatile("wfi");
+}
+void idle_task_create(void)
+{
+    uint32_t *sp = &stacks[0][STACK_SIZE];
+    sp -= 32;
+
+    for (int w = 0; w < 32; w++)
+        sp[w] = 0;
+
+    sp[30] = (uint32_t)idle_task;
+    sp[31] = ((3 << 11) | (1 << 7));
+
+    tcb[0].sp = (uint32_t *)sp;
+    tcb[0].priority = 0;
+    tcb[0].state = TASK_READY;
+}
 
 void task_yield(void)
 {

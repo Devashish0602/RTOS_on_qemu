@@ -115,3 +115,8 @@ restore:
  
     addi    sp, sp, 128
     mret
+
+    .global start_first_task
+start_first_task:
+    mv   sp, a0         
+    j    restore  

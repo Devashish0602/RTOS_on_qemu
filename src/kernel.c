@@ -29,13 +29,14 @@ uint32_t *context_switch(uint32_t *sp)
     tcb[current_task].sp = sp;
     timer_next();
     int i=current_task+1;
-    while(i!=current_task){
-        if(tcb[i].state == TASK_READY){
-            if(higest_priority_task == -1 || tcb[i].priority>= tcb[higest_priority_task].priority ){
-                higest_priority_task =i;
+
+    for(int i=1;i<=TOTTASKS;i++){
+        int n = (current_task+i)%TOTTASKS;
+        if(tcb[n].state == TASK_READY){
+            if(higest_priority_task == -1 || tcb[n].priority> tcb[higest_priority_task].priority ){
+                higest_priority_task =n;
             }
         }
-        i=((i+1)%TOTTASKS);
     }
 
     current_task = higest_priority_task;

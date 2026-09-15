@@ -4,43 +4,49 @@
 #include "kernel.h"
 #include "uart.h"
 
-uint32_t uart_semaphore =1;
+extern volatile uint32_t ticks;
 
 extern TCB tcb[TOTTASKS];
 
-
-
 void task1(void)
 {
-  while(1){
+  while (1)
+  {
     uart_putc('A');
-    yield_task();
+    put_hex(ticks);
+    uart_putc('\n');
+    task_delay(500);
   }
 }
 
 void task2(void)
 {
-  while(1){
+  while (1)
+  {
     uart_putc('B');
-    yield_task();
+    put_hex(ticks);
+    uart_putc('\n');
+    task_delay(100);
   }
 }
 
 void task3(void)
 {
-  while(1){
+  while (1)
+  {
     uart_putc('C');
-    yield_task();
+    put_hex(ticks);
+    uart_putc('\n');
+    task_delay(10);
   }
 }
-
 
 int main(void)
 {
   idle_task_create();
-  task_create(1, task1,1);
-  task_create(2, task2,1);
-  task_create(3, task3,1);
+  task_create(1, task1, 1);
+  task_create(2, task2, 1);
+  task_create(3, task3, 1);
   timer_init();
   start_first_task(tcb[0].sp);
   for (;;)

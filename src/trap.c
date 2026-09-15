@@ -4,7 +4,7 @@
 #include "timer.h"
 
 
-static void put_hex(uint32_t v)
+void put_hex(uint32_t v)
 {
     const char *d = "0123456789abcdef";
     char buf[11] = "0x";

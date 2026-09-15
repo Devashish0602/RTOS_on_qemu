@@ -18,6 +18,7 @@ typedef struct {
     uint32_t* sp;
     uint32_t priority;
     state_t state;
+    uint32_t wake_ticks;
 } TCB;
 
 uint32_t* context_switch(uint32_t *sp);
@@ -31,6 +32,8 @@ void idle_task_create(void);
 uint32_t* yield_switch(uint32_t*sp);
 
 void yield_task(void);
+
+void task_delay(uint32_t n);
 
 
 #endif

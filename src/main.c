@@ -8,11 +8,13 @@ uint32_t uart_semaphore =1;
 
 extern TCB tcb[TOTTASKS];
 
+
+
 void task1(void)
 {
   while(1){
     uart_putc('A');
-    // task_yield();
+    yield_task();
   }
 }
 
@@ -20,7 +22,7 @@ void task2(void)
 {
   while(1){
     uart_putc('B');
-    // task_yield();
+    yield_task();
   }
 }
 
@@ -28,9 +30,10 @@ void task3(void)
 {
   while(1){
     uart_putc('C');
-    // task_yield();
+    yield_task();
   }
 }
+
 
 int main(void)
 {

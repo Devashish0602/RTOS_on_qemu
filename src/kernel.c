@@ -28,7 +28,6 @@ uint32_t *context_switch(uint32_t *sp)
     int higest_priority_task = -1;
     tcb[current_task].sp = sp;
     timer_next();
-    int i=current_task+1;
 
     for(int i=1;i<=TOTTASKS;i++){
         int n = (current_task+i)%TOTTASKS;
@@ -42,6 +41,15 @@ uint32_t *context_switch(uint32_t *sp)
     current_task = higest_priority_task;
 
     return tcb[current_task].sp;
+}
+
+uint32_t* yield_switch(uint32_t*sp){
+    sp[30]+=4;
+    return context_switch(sp);
+}
+
+void yield_task(void){
+    __asm__ volatile("ecall");
 }
 
 void idle_task(void)
@@ -65,7 +73,9 @@ void idle_task_create(void)
     tcb[0].state = TASK_READY;
 }
 
-void task_yield(void)
+inline void task_yield(uint32_t task)
 {
+    uint32_t *sp = &(stacks[task][0]);
+    sp[30]+=4;
     __asm__ volatile("ecall");
 }

@@ -64,6 +64,8 @@ addi    sp, sp, -128            # allocate frame first: offsets stay positive
 
     csrr t0, mcause
     bltz t0, interrupt_handler
+    li t1, 11
+    beq t1, t0, yield 
 
     call trap_handler
     j   restore 
@@ -115,6 +117,11 @@ restore:
  
     addi    sp, sp, 128
     mret
+yield:
+    mv    a0, sp
+    call  yield_switch
+    mv    sp, a0
+    j     restore
 
     .global start_first_task
 start_first_task:

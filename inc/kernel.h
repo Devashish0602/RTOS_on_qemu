@@ -24,12 +24,13 @@ uint32_t* context_switch(uint32_t *sp);
 
 void task_create(int task, void (*fn)(void),uint32_t priority);
 
-void task_yield(void);
-
 void idle_task(void);
 
-void ideal_task_create(void);
+void idle_task_create(void);
 
+uint32_t* yield_switch(uint32_t*sp);
+
+void yield_task(void);
 
 
 #endif

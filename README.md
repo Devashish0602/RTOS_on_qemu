@@ -138,8 +138,6 @@ for (int n = 1; n <= NTASKS; n++) {
 
 Strict `>` combined with the rotated start gives round-robin within a priority level and strict preemption across levels. The idle task is always READY, so the scan can never fail.
 
-O(n) is fine at this task count; a priority bitmap with a leading-zero count would make it O(1).
-
 ### Timer acknowledgement
 
 The CLINT machine timer has no pending bit and no clear register — the interrupt is asserted continuously while `mtime >= mtimecmp`. Rescheduling the compare value *is* the acknowledgement.
